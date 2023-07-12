@@ -57,7 +57,31 @@ function ListItem({
     />
   )
 }
-ListItem = React.memo(ListItem)
+ListItem = React.memo(ListItem, (prevProps, newProps) => {
+  if (
+    prevProps.getItemProps !== newProps.getItemProps ||
+    prevProps.item !== newProps.item ||
+    prevProps.index !== newProps.index ||
+    prevProps.selectedItem !== newProps.selectedItem
+  )
+    return false
+
+  // my implementation (works)
+  // if (
+  //   (prevProps.highlightedIndex === prevProps.index &&
+  //     newProps.highlightedIndex !== newProps.index) ||
+  //   (prevProps.highlightedIndex !== prevProps.index &&
+  //     newProps.highlightedIndex === newProps.index)
+  // )
+  //   return false
+  if (prevProps.highlightedIndex !== newProps.highlightedIndex) {
+    const wasPrevHighlighted = prevProps.highlightedIndex === prevProps.index
+    const isNowHighlighted = newProps.highlightedIndex === newProps.index
+    return wasPrevHighlighted === isNowHighlighted
+  }
+
+  return true
+})
 // 🐨 Memoize the ListItem here using React.memo
 
 function App() {
