@@ -1,5 +1,25 @@
 import * as React from 'react'
-import useInterval from 'use-interval'
+// import useInterval from 'use-interval'
+
+function useInterval(callback, delay) {
+  const savedCallback = React.useRef()
+
+  // Remember the latest function.
+  React.useEffect(() => {
+    savedCallback.current = callback
+  }, [callback])
+
+  // Set up the interval.
+  React.useEffect(() => {
+    function tick() {
+      savedCallback.current()
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay)
+      return () => clearInterval(id)
+    }
+  }, [delay])
+}
 
 function useSafeDispatch(dispatch) {
   const mounted = React.useRef(false)
@@ -53,15 +73,18 @@ function useAsync(initialState) {
     [safeSetState],
   )
 
-  const setData = React.useCallback(data => safeSetState({data}), [
-    safeSetState,
-  ])
-  const setError = React.useCallback(error => safeSetState({error}), [
-    safeSetState,
-  ])
-  const reset = React.useCallback(() => safeSetState(initialStateRef.current), [
-    safeSetState,
-  ])
+  const setData = React.useCallback(
+    data => safeSetState({data}),
+    [safeSetState],
+  )
+  const setError = React.useCallback(
+    error => safeSetState({error}),
+    [safeSetState],
+  )
+  const reset = React.useCallback(
+    () => safeSetState(initialStateRef.current),
+    [safeSetState],
+  )
 
   return {
     // using the same names that react-query uses for convenience
@@ -199,6 +222,7 @@ function updateGridCellState(grid, {row, column}) {
 }
 
 export {
+  useInterval,
   useAsync,
   useForceRerender,
   useDebouncedState,
