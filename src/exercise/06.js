@@ -9,13 +9,27 @@ import {
   updateGridState,
   updateGridCellState,
 } from '../utils'
+import {useContext} from 'react'
 
 const AppStateContext = React.createContext()
 const AppDispatchContext = React.createContext()
+const DogNameContext = React.createContext()
 
 const initialGrid = Array.from({length: 100}, () =>
   Array.from({length: 100}, () => Math.random() * 100),
 )
+function DogNameProvider({children}) {
+  const [state, setState] = React.useState('')
+  const value = React.useMemo(() => [state, setState], [state])
+  return (
+    <DogNameContext.Provider value={value}>{children}</DogNameContext.Provider>
+  )
+}
+function useDogNameState() {
+  let context = useContext(DogNameContext)
+  if (!context) throw new Error('use dogName context inside dogName Provider')
+  return context
+}
 
 function appReducer(state, action) {
   switch (action.type) {
@@ -38,8 +52,6 @@ function appReducer(state, action) {
 
 function AppProvider({children}) {
   const [state, dispatch] = React.useReducer(appReducer, {
-    // 💣 remove the dogName state because we're no longer managing that
-    // dogName: '',
     grid: initialGrid,
   })
   return (
@@ -108,7 +120,7 @@ Cell = React.memo(Cell)
 function DogNameInput() {
   // 🐨 replace the useAppState and useAppDispatch with a normal useState here
   // to manage the dogName locally within this component
-  const [dogName, setDogName] = React.useState('')
+  const [dogName, setDogName] = useDogNameState()
 
   function handleChange(event) {
     const newDogName = event.target.value
@@ -139,12 +151,14 @@ function App() {
   return (
     <div className="grid-app">
       <button onClick={forceRerender}>force rerender</button>
-      <AppProvider>
-        <div>
+      <div>
+        <DogNameProvider>
           <DogNameInput />
+        </DogNameProvider>
+        <AppProvider>
           <Grid />
-        </div>
-      </AppProvider>
+        </AppProvider>
+      </div>
     </div>
   )
 }
