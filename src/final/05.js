@@ -56,6 +56,7 @@ function useAppState() {
 
 function Grid() {
   const [, dispatch] = useAppState()
+  // const [rows, setRows] = React.useState(50)
   const [rows, setRows] = useDebouncedState(50)
   const [columns, setColumns] = useDebouncedState(50)
   const updateGridData = () => dispatch({type: 'UPDATE_GRID'})
